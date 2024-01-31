@@ -5,6 +5,8 @@ public class Spaceship extends Sprite2D{
         super(img, windowWidth);
     }
     public void movePlayer() {  //moves player along the x axis, a positive or negative number based on what key is pressed
-        x += xVel;
+        if (x <= windowWidth - InvadersApplication.BORDER_OFFSET && x >= InvadersApplication.BORDER_OFFSET) {
+            x += xVel;
+        }
     }
 }

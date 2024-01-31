@@ -1,32 +1,27 @@
 import javax.swing.*;
 import java.awt.*;
 
-public class Sprite2D {
-    private double x,y;
-    private double xVel = 0;
-    private Image myImage;
+public abstract class Sprite2D {
+    protected double x,y;
+    protected double xVel = 0;
+    protected Image myImage;
+    protected int windowWidth;
 
-    public Sprite2D(ImageIcon img) {
-
+    public Sprite2D(ImageIcon img, int windowWidth) {
+        myImage = img.getImage(); //sprite given respective image file
+        this.windowWidth = windowWidth;
     }
 
-    public void moveEnemy() {
-
+    public void setPosition(double x, double y) { //sets initial sprite pos
+        this.x = x;
+        this.y = y;
     }
 
-    public void setPosition() {
-
+    public void setXVel(double dx) {    //movement speed
+        xVel = dx;
     }
 
-    public void movePlayer() {
-
-    }
-
-    public void setXVel(double dx) {
-
-    }
-
-    public void paint(Graphics g) {
-
+    public void paint(Graphics g) { //paints sprite
+        g.drawImage(myImage, (int) x, (int) y, null);
     }
 }
