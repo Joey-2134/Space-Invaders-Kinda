@@ -5,6 +5,7 @@ import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
 
 public class InvadersApplication extends JFrame implements Runnable, KeyListener {
+    //Config settings
     public final int FRAME_TIME = 20;
     public final int ALIENS_PER_LINE = 5;
     public final int NUM_ALIENS = ALIENS_PER_LINE * ALIENS_PER_LINE;
@@ -22,13 +23,13 @@ public class InvadersApplication extends JFrame implements Runnable, KeyListener
 
     private static final Dimension WindowSize = new Dimension(WINDOW_SIZE_X, WINDOW_SIZE_Y); // Updated window size
 
-    private final Alien[] aliens = new Alien[NUM_ALIENS];
-    private final Spaceship player = new Spaceship(new ImageIcon("Assets/player_ship.png"), WindowSize.width);
-    private final BufferStrategy strategy;
+    private final Alien[] aliens = new Alien[NUM_ALIENS]; //array for storing alien sprites
+    private final Spaceship player = new Spaceship(new ImageIcon("Assets/player_ship.png"), WindowSize.width);// player created
+    private final BufferStrategy strategy; //double buffering implementation to remove flickering during V-Sync
 
     public InvadersApplication() {
         this.setTitle("Assignment 3");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //end program on close
         Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 
         int x = screenSize.width/2 - WindowSize.width/2;
@@ -37,12 +38,14 @@ public class InvadersApplication extends JFrame implements Runnable, KeyListener
         setVisible(true);
 
         for (int i = 0, yPosIterator = 0; i < NUM_ALIENS; i++) {
+            //alien array filled with aliens in a grid formation
             Alien alien = new Alien(new ImageIcon("Assets/alien_ship_1.png"), WindowSize.width);
             aliens[i] = alien;
-            if (i % ALIENS_PER_LINE == 0) yPosIterator++;
+            if (i % ALIENS_PER_LINE == 0) yPosIterator++; //increments current row to put aliens on next line
 
             double yPos = GRID_SPACER_Y * yPosIterator;
 
+            // I hate this, just centers the grid at the beginning
             double totalGridWidth = (ALIEN_WIDTH + GRID_SPACER_X) * (ALIENS_PER_LINE - 1);
             double gridStartX = (WindowSize.width - totalGridWidth) / 2;
             double xPos = gridStartX + ((ALIEN_WIDTH + GRID_SPACER_X) * (i % ALIENS_PER_LINE)) - (ALIEN_WIDTH /2);
@@ -51,12 +54,12 @@ public class InvadersApplication extends JFrame implements Runnable, KeyListener
         }
         player.setPosition((double) WindowSize.width / 2 - (PLAYER_WIDTH / 2), WindowSize.height - BORDER_OFFSET); // Center player in new resolution
 
-        addKeyListener(this);
+        addKeyListener(this); //for key inputs
 
         createBufferStrategy(2);
         strategy = getBufferStrategy();
 
-        Thread t = new Thread(this);
+        Thread t = new Thread(this);//start the thread
         t.start();
     }
 
@@ -65,6 +68,7 @@ public class InvadersApplication extends JFrame implements Runnable, KeyListener
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, WindowSize.width, WindowSize.height); // Fill canvas with new size
 
+        //paint player and all aliens
         player.paint(g);
         for (Sprite2D alien : aliens) {
             alien.paint(g);
@@ -78,7 +82,7 @@ public class InvadersApplication extends JFrame implements Runnable, KeyListener
     }
 
     @Override
-    public void keyPressed(KeyEvent e) {    //event handlers for when a and d are pressed
+    public void keyPressed(KeyEvent e) {    //event handlers for when selected buttons are pressed
         if (Character.toLowerCase(e.getKeyChar()) == LEFT_KEY) {
             player.setXVel(-PLAYER_VELOCITY);
         } else if (Character.toLowerCase(e.getKeyChar()) == RIGHT_KEY) {
@@ -89,7 +93,7 @@ public class InvadersApplication extends JFrame implements Runnable, KeyListener
     @Override
     public void keyReleased(KeyEvent e) {
         if (e.getKeyChar() == LEFT_KEY || e.getKeyChar() == RIGHT_KEY) {
-            player.setXVel(0); //stops player moving when a or d is released
+            player.setXVel(0); //stops player moving when movement key is released
         }
     }
 

@@ -12,7 +12,7 @@ public class Alien extends Sprite2D {
     public void moveEnemy() {
         x += xVel * directionModifier;
     }
-
+    //checks every alien, if one of them hits the border offset, invert the direction modifier then call move down on the aliens array to ensure every alien is moved
     public static void invertDirection(Alien[] aliens) {
         for (Alien alien : aliens) {
             if ((alien.x >= WINDOW_WIDTH - InvadersApplication.BORDER_OFFSET && directionModifier == 1) || (alien.x <= InvadersApplication.BORDER_OFFSET && directionModifier == -1)) {
