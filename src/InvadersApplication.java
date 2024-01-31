@@ -5,10 +5,9 @@ import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
 import java.io.File;
 import java.io.IOException;
-
 import static java.lang.System.exit;
 
-public class InvadersApplication extends JFrame implements Runnable, KeyListener {
+public class InvadersApplication extends JFrame implements Runnable, KeyListener{
     //Config settings
     public final int FRAME_TIME = 20;
     public final int ALIENS_PER_LINE = 5;
@@ -19,7 +18,7 @@ public class InvadersApplication extends JFrame implements Runnable, KeyListener
     public final int PLAYER_WIDTH = 54;
     public static final int BORDER_OFFSET = 100;
     public final int PLAYER_VELOCITY = 10;
-    public final int ALIEN_VELOCITY = 15;
+    public final int ALIEN_VELOCITY = 30;
     public final char LEFT_KEY = 'a';
     public final char RIGHT_KEY = 'd';
     public static final int WINDOW_SIZE_X = 1200;
@@ -44,6 +43,18 @@ public class InvadersApplication extends JFrame implements Runnable, KeyListener
         setVisible(true);
 
 
+        resetAlienPositions();  //aliens returned to original position
+        resetPlayerPosition(); //sets player position back to centre
+        addKeyListener(this); //for key inputs
+
+        createBufferStrategy(2);
+        strategy = getBufferStrategy();
+
+        Thread t = new Thread(this);//start the thread
+        t.start();
+    }
+
+    private void resetAlienPositions() {
         for (int i = 0, yPosIterator = 0; i < NUM_ALIENS; i++) {
             //alien array filled with aliens in a grid formation
             Alien alien = new Alien(new ImageIcon("Assets/alien_ship_1.png"), WindowSize.width);
@@ -59,15 +70,10 @@ public class InvadersApplication extends JFrame implements Runnable, KeyListener
 
             aliens[i].setPosition(xPos, yPos);
         }
-        player.setPosition((double) WindowSize.width / 2 - (PLAYER_WIDTH / 2), WindowSize.height - BORDER_OFFSET); // Center player in new resolution
+    }
 
-        addKeyListener(this); //for key inputs
-
-        createBufferStrategy(2);
-        strategy = getBufferStrategy();
-
-        Thread t = new Thread(this);//start the thread
-        t.start();
+    private void resetPlayerPosition() {
+        player.setPosition((double) WindowSize.width / 2 - (PLAYER_WIDTH / 2), WindowSize.height - BORDER_OFFSET);
     }
 
     public void paint(Graphics g) {
@@ -81,7 +87,7 @@ public class InvadersApplication extends JFrame implements Runnable, KeyListener
             for (Sprite2D alien : aliens) {
                 alien.paint(g);
             }
-        } else {
+        } else { //if game over flag is true, run this method
             gameOver(g);
         }
         strategy.show();
@@ -89,16 +95,32 @@ public class InvadersApplication extends JFrame implements Runnable, KeyListener
 
     private void gameOver(Graphics g) {
         try {
-            Font customFont = Font.createFont(Font.TRUETYPE_FONT, new File("Assets/Fonts/ArcadeInterlaced-O4d.ttf")).deriveFont(50f);
+            Font customFont = Font.createFont(Font.TRUETYPE_FONT, new File("Assets/Fonts/ArcadeInterlaced-O4d.ttf"));
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             ge.registerFont(customFont);
             g.setColor(Color.RED);
-            g.setFont(customFont);
-            g.drawString("Game Over", WindowSize.width / 2 - 225 , WindowSize.height / 2); //todo make scalable
+
+            Font largeFont = customFont.deriveFont(50f); // Larger font size for "Game Over"
+            g.setFont(largeFont);
+            g.drawString("Game Over", WindowSize.width / 2 - 225, WindowSize.height / 2);
+
+            Font smallerFont = customFont.deriveFont(30f); // Smaller font size for "Try Again" and "Exit"
+            g.setFont(smallerFont);
+            g.setColor(Color.GREEN);
+            g.drawString("Restart(1)", WindowSize.width / 2 + 50, WindowSize.height / 2 + 100);
+            g.drawString("Exit(2)", WindowSize.width / 2 - 250, WindowSize.height / 2 + 100);
 
         } catch (IOException | FontFormatException e) {
             throw new RuntimeException(e);
         }
+
+    }
+
+    private void restartGame() {
+        isGameOver = false;
+        resetPlayerPosition();
+        resetAlienPositions();
+        repaint();
     }
 
     @Override
@@ -108,10 +130,20 @@ public class InvadersApplication extends JFrame implements Runnable, KeyListener
 
     @Override
     public void keyPressed(KeyEvent e) {    //event handlers for when selected buttons are pressed
-        if (Character.toLowerCase(e.getKeyChar()) == LEFT_KEY) {
-            player.setXVel(-PLAYER_VELOCITY);
-        } else if (Character.toLowerCase(e.getKeyChar()) == RIGHT_KEY) {
-            player.setXVel(PLAYER_VELOCITY);
+        if (!isGameOver) {
+            // Existing movement controls
+            if (Character.toLowerCase(e.getKeyChar()) == LEFT_KEY) {
+                player.setXVel(-PLAYER_VELOCITY);
+            } else if (Character.toLowerCase(e.getKeyChar()) == RIGHT_KEY) {
+                player.setXVel(PLAYER_VELOCITY);
+            }
+        } else {
+            // Additional controls for game over state
+            if (e.getKeyChar() == '1') {
+                restartGame();
+            } else if (e.getKeyChar() == '2') {
+                exit(0); // Exit the game
+            }
         }
     }
 
