@@ -3,6 +3,10 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
+import java.io.File;
+import java.io.IOException;
+
+import static java.lang.System.exit;
 
 public class InvadersApplication extends JFrame implements Runnable, KeyListener {
     //Config settings
@@ -15,11 +19,13 @@ public class InvadersApplication extends JFrame implements Runnable, KeyListener
     public final int PLAYER_WIDTH = 54;
     public static final int BORDER_OFFSET = 100;
     public final int PLAYER_VELOCITY = 10;
-    public final int ALIEN_VELOCITY = 5;
+    public final int ALIEN_VELOCITY = 15;
     public final char LEFT_KEY = 'a';
     public final char RIGHT_KEY = 'd';
     public static final int WINDOW_SIZE_X = 1200;
     public static final int WINDOW_SIZE_Y = 900;
+
+    private boolean isGameOver = false;
 
     private static final Dimension WindowSize = new Dimension(WINDOW_SIZE_X, WINDOW_SIZE_Y); // Updated window size
 
@@ -36,6 +42,7 @@ public class InvadersApplication extends JFrame implements Runnable, KeyListener
         int y = screenSize.height/2 - WindowSize.height/2;
         setBounds(x, y, WindowSize.width, WindowSize.height);
         setVisible(true);
+
 
         for (int i = 0, yPosIterator = 0; i < NUM_ALIENS; i++) {
             //alien array filled with aliens in a grid formation
@@ -69,11 +76,29 @@ public class InvadersApplication extends JFrame implements Runnable, KeyListener
         g.fillRect(0, 0, WindowSize.width, WindowSize.height); // Fill canvas with new size
 
         //paint player and all aliens
-        player.paint(g);
-        for (Sprite2D alien : aliens) {
-            alien.paint(g);
+        if (!isGameOver) {
+            player.paint(g);
+            for (Sprite2D alien : aliens) {
+                alien.paint(g);
+            }
+        } else {
+            gameOver(g);
         }
         strategy.show();
+    }
+
+    private void gameOver(Graphics g) {
+        try {
+            Font customFont = Font.createFont(Font.TRUETYPE_FONT, new File("Assets/Fonts/ArcadeInterlaced-O4d.ttf")).deriveFont(50f);
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            ge.registerFont(customFont);
+            g.setColor(Color.RED);
+            g.setFont(customFont);
+            g.drawString("Game Over", WindowSize.width / 2 - 225 , WindowSize.height / 2); //todo make scalable
+
+        } catch (IOException | FontFormatException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -103,6 +128,10 @@ public class InvadersApplication extends JFrame implements Runnable, KeyListener
 
             Alien.invertDirection(aliens);
             for (Alien alien : aliens) { //every thread loop, player and alien is moved
+                if (alien.y >= player.y - 100) {
+                    isGameOver = true;
+                    break;
+                }
                 alien.setXVel(ALIEN_VELOCITY);
                 alien.moveEnemy();
             }
