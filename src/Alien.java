@@ -4,9 +4,10 @@ public class Alien extends Sprite2D {
     private static final int WINDOW_WIDTH = InvadersApplication.WINDOW_SIZE_X;
     //private static final int WINDOW_HEIGHT = InvadersApplication.WINDOWSIZEY;
     private static int directionModifier = 1;
+    public boolean isAlive = true;
 
-    public Alien(ImageIcon img, int windowWidth) {
-        super(img, windowWidth);
+    public Alien(ImageIcon img, ImageIcon img2, int windowWidth) {
+        super(img, img2, windowWidth);
     }
 
     public void moveEnemy() {
